@@ -29,3 +29,5 @@ Given a number of sequences of obsevervations:
 
 ***********************************
 I want to apply HMMs for my gesture recognition application.
+
+	
