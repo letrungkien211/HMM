@@ -13,7 +13,7 @@ private:
 	int m;  // number of observation in alphabet
 	MatrixXd a;  // state transition probability distribution nxn
 	MatrixXd b;  // observation symbol probability distribution nxm
-	MatrixXd pi; // initial state distribution
+	MatrixXd pi; // intitial state distribution
 
 public:
 	HMM(int n_, int m_);
@@ -39,7 +39,6 @@ public:
 	MatrixXd &A();
 	MatrixXd &B();
 	MatrixXd &PI();
-
 };
 
 #endif
