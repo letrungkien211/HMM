@@ -3,6 +3,9 @@
 
 #include <vector>
 #include <eigen3/Eigen/Dense>  // eigen: linear algebra library
+
+namespace ltk{
+
 using namespace std;
 using namespace Eigen;
 
@@ -21,8 +24,8 @@ public:
 
 	// Methods
 	double Evaluate(const MatrixXi &observation);
-	MatrixXd Forward(const MatrixXi &observation);
-	MatrixXd Backward(const MatrixXi &observation);
+	MatrixXd Forward(const MatrixXi &observation, MatrixXd &scale);
+	MatrixXd Backward(const MatrixXi &observation, MatrixXd &scale);
 	MatrixXi Decode(const MatrixXi &observation, double & probability);
 	double Learn(vector<MatrixXi> &observation, int iterations, double tolerance);
 
@@ -40,5 +43,7 @@ public:
 	MatrixXd &B();
 	MatrixXd &PI();
 };
+
+}
 
 #endif
