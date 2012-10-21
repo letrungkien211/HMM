@@ -8,8 +8,10 @@
 #include "hmm.hpp"
 #include <iostream>
 
+namespace ltk{
+
 HMM::HMM(int n_, int m_) :
-n(n_), m(m_) {
+		n(n_), m(m_) {
 	a.resize(n, n);
 	b.resize(n, m);
 	pi.resize(n, 1);
@@ -17,32 +19,38 @@ n(n_), m(m_) {
 
 double HMM::Evaluate(const MatrixXi &observation) {
 	// 3. Termination
-	MatrixXd fwd = Forward(observation);
-	return fwd.row(observation.rows()-1).sum();
+	MatrixXd c;
+	Forward(observation, c);
+	return log(c).sum();
 }
 
-MatrixXd HMM::Forward(const MatrixXi &observation) {
+MatrixXd HMM::Forward(const MatrixXi &observation, MatrixXd &scale) {
 	int T = observation.rows();
 	MatrixXd fwd(T, n);
-	double scale = 0;
+	scale.resize(T, 1);
 
 	// 1. Initialization
 	fwd.row(0) = (pi.array()*b.col(0).array()).transpose();
-	scale = fwd.row(0).sum();
-	if(scale)
-		fwd.row(0)/=scale;
+	scale(0) = fwd.row(0).sum();
+	if(scale(0))
+		fwd.row(0)/=scale(0);
 	// 2. Induction
 	for(unsigned int t = 1; t <T; t++){
 		fwd.row(t) = fwd.row(t-1)*a;
 		for(unsigned int i = 0; i<n; ++i)
 			fwd(t,i)*=b(i, observation(t));
-		scale = fwd.row(t).sum();
-		if(scale)
-			fwd.row(t)/=scale;
+		scale(t) = fwd.row(t).sum();
+		if(scale(t))
+			fwd.row(t)/=scale(t);
 
 	}
 	return fwd;
 }
+
+MatrixXd HMM::Backward(const MatrixXi &observation, MatrixXd &scale){
+
+}
+
 
 /* Private members access
  *
@@ -76,4 +84,5 @@ MatrixXd HMM::PI() const {
 }
 MatrixXd &HMM::PI() {
 	return pi;
+}
 }
