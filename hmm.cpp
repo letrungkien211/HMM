@@ -17,6 +17,9 @@ HMM::HMM(int n_, int m_) :
 	pi.resize(n, 1);
 }
 
+HMM::~HMM(){
+}
+
 double HMM::Evaluate(const MatrixXi &observation) {
 	// 3. Termination
 	MatrixXd c;

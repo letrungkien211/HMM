@@ -9,7 +9,6 @@ namespace ltk{
 using namespace std;
 using namespace Eigen;
 
-
 class HMM{
 private:
 	int n;  // number of states
@@ -21,14 +20,12 @@ private:
 public:
 	HMM(int n_, int m_);
 	~HMM();
-
 	// Methods
 	double Evaluate(const MatrixXi &observation);
 	MatrixXd Forward(const MatrixXi &observation, MatrixXd &scale);
 	MatrixXd Backward(const MatrixXi &observation, MatrixXd &scale);
-	MatrixXi Decode(const MatrixXi &observation, double & probability);
+	MatrixXi Decode(const MatrixXi &observation, double &probability);
 	double Learn(vector<MatrixXi> &observation, int iterations, double tolerance);
-
 	void Reset();
 
 	// private members access
@@ -43,7 +40,5 @@ public:
 	MatrixXd &B();
 	MatrixXd &PI();
 };
-
 }
-
 #endif
