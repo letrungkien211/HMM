@@ -15,7 +15,7 @@ private:
 	int m;  // number of observation in alphabet
 	MatrixXd a;  // state transition probability distribution nxn
 	MatrixXd b;  // observation symbol probability distribution nxm
-	MatrixXd pi; // initial state distribution
+	MatrixXd pi; // initial state distribution nx1
 
 public:
 	HMM(int n_, int m_);
@@ -23,7 +23,7 @@ public:
 	// Methods
 	double Evaluate(const MatrixXi &observation);
 	MatrixXd Forward(const MatrixXi &observation, MatrixXd &scale);
-	MatrixXd Backward(const MatrixXi &observation, MatrixXd &scale);
+	MatrixXd Backward(const MatrixXi &observation, const MatrixXd &scale);
 	MatrixXi Decode(const MatrixXi &observation, double &probability);
 	double Learn(vector<MatrixXi> &observation, int iterations, double tolerance);
 	void Reset();
