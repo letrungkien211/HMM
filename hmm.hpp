@@ -46,6 +46,7 @@ public:
 	MatrixXd &PI();
 };
 
+void Scale(MatrixXd &m, int scale);
 template <class T>
 class MyMatrix3x{
 private:

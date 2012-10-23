@@ -13,10 +13,14 @@
 using namespace std;
 using namespace ltk;
 int main(int argc, char* argv[]){
-	HMM hmm(3,3);
-	hmm.A() << 1,2,3,4,5,6,7,8,9;
-	MatrixXi ob(10,1);
+	HMM hmm(2,2);
+	hmm.A() << 0.5,0.5,0.0,1.0;
+	hmm.B() << 0.5,0.5,0.5,0.5;
+	hmm.PI() << 0.5,  0.5, 0.5;
+	MatrixXi ob(3,1);
 	MatrixXd scale;
+
+	ob << 0,0,1;
 	hmm.Forward(ob, scale);
 	return 0;
 }
