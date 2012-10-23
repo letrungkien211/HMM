@@ -1,16 +1,16 @@
 CC = g++
 RM = rm -f
 LIBS = -lm -llapack -lblas 
-CFLAGS = -Wall -g
+CFLAGS = -Wall
 
 TARGET = main
 OBJS = main.o hmm.o
 all: $(TARGET)
 
 .c.o:
-	$(CC) -c $(CFLAGS)  $<
+	$(CC) -g -c $(CFLAGS)  $<
 $(TARGET): $(OBJS)
-	$(CC) -o $@ $^ $(LIBS) 
+	$(CC) -g -o $@ $^ $(LIBS) 
 
 clean:
 	$(RM) $(TARGET) *#* *~ *.o

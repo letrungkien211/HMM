@@ -45,35 +45,5 @@ public:
 	MatrixXd &PI();
 };
 
-class MyMatrix3d{
-private:
-	int width, height;
-	MatrixXd data;
-public:
-	MyMatrix3d():width(0), height(0){
-	}
-	MyMatrix3d(int m, int n, int p): width(m), height(n){
-		resize(m,n,p);
-	}
-	void resize(int m, int n, int p){
-		data.resize(m*n*p, 1);
-	}
-	double operator()(int i, int j, int k) const{
-		return data(i + j*width + k*width*height);
-	}
-	double& operator()(int i, int j, int k){
-		return data(i + j*width + k*width*height);
-	}
-
-	MatrixXd operator()() const{
-		return data;
-	}
-};
-
-ostream operator<<(ostream &os, const MyMatrix3d &m){
-	os << m();
-	return os;
-}
-
 }
 #endif
