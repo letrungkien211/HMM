@@ -12,23 +12,21 @@
 #include <boost/multi_array.hpp>
 namespace ltk {
 
-using namespace boost;
+typedef boost::multi_array<double, 3> array_type;
 
-
-HMM::HMM(int n_, int m_) :
-														n(n_), m(m_) {
-	a.resize(n, n);
-	b.resize(n, m);
-	pi.resize(n, 1);
+HMM::HMM(int n_, int m_){
+	Initialize(n_,m_);
 }
 
 HMM::~HMM() {
-
 }
 
 double HMM::Evaluate(const MatrixXi &observation, bool logarithm) {
 	MatrixXd scale;
+	// Run forward
 	Forward(observation, scale);
+
+	// Sum up scaling factors
 	double prob = 0;
 	for (int t = 0, T = observation.rows(); t < T; t++)
 		prob += log((double) scale(t));
@@ -84,43 +82,44 @@ MatrixXd HMM::Backward(const MatrixXi &observation, const MatrixXd &scale) {
 }
 
 MatrixXi HMM::Decode(const MatrixXi &observation, double& probability) {
-	MatrixXi path;
+	int T = observation.rows();
+	MatrixXi path(T,1);
+
+
 
 	return path;
 }
 
-typedef multi_array<double, 3> array_type;
-
-double HMM::Learn(vector<MatrixXi> &observation, int maxIteration,
-		double tolerance) {
+double HMM::Learn(vector<MatrixXi> &observation, int maxIteration, double tolerance) {
 	double newLikelihood, oldLikelihood;
 	int K = observation.size();
 	vector<MatrixXd> gamma(K);
 	vector<array_type> epsilon(K);
 
 	//  Initialization
-
 	for (int k = 0; k < K; k++) {
 		int T = observation[k].rows();
 		gamma[k].resize(T, n);
 		boost::array<array_type::index, 3> shape = {{T,n,n}};
 		epsilon[k].resize(shape);
 	}
+
 	oldLikelihood = -numeric_limits<double>::max();
 	newLikelihood = 0.0;
 	int currentIteration = 0;
 
+	// Start the loop
 	bool stop = false;
 	do {
-		// Calculate fwd, bwd, gamma, epsilon
+		// Calculate forward, backward, gamma, epsilon
 		for (int k = 0; k < K; k++) {
-			MatrixXi &cobservation = observation[k];
 			MatrixXd scale;
+			MatrixXi &cobservation = observation[k]; // current observation
 			MatrixXd &cgamma = gamma[k]; // current gamma
-
+			array_type &cepsilon = epsilon[k]; // current epsilon
 			int T = cobservation.rows();
 
-			// Run fowward, backward
+			// Run forward, backward
 			MatrixXd fwd = Forward(cobservation, scale);
 			MatrixXd bwd = Backward(cobservation, scale);
 
@@ -139,32 +138,31 @@ double HMM::Learn(vector<MatrixXi> &observation, int maxIteration,
 				double s = 0;
 				for (int i = 0; i < n; i++) {
 					for (int j = 0; j < n; j++) {
-						double logvalue = log((double)fwd(t, i)) +log((double) a(i, j))+log((double) b(j, cobservation(t + 1))) + log((double)bwd(t + 1, j));
-						s+=epsilon[k][t][i][j] = exp(logvalue);
-						//cout <<epsilon[k][t][i][j]<<"  ";
+						s+=cepsilon[t][i][j] = fwd(t,i)*a(i,j)*b(j,cobservation(t+1))*bwd(t+1,j);
 					}
 				}
 				if (s) {
 					for (int i = 0; i < n; i++) {
 						for (int j = 0; j < n; j++) {
-							epsilon[k][t][i][j] = epsilon[k][t][i][j]/s;
+							cepsilon[t][i][j] = cepsilon[t][i][j]/s;
 						}
 					}
 				}
 			}
-
-
+			// Culminate newLikelihood
 			for (int t = 0; t < T; ++t)
 				newLikelihood += log((double)scale(t));
 		}
 
-		//cout << "GAMMA"<< endl << gamma[3] <<endl <<endl;
-		newLikelihood /= K;
-		cout << currentIteration << ": " << newLikelihood << endl;
-		if (CheckConvergen(oldLikelihood, newLikelihood, currentIteration,
+		newLikelihood /= K; // averaging
+		cout << currentIteration << ": " << newLikelihood << endl; // print current likelihood
+
+		// Check convergence
+		if (CheckConvergence(oldLikelihood, newLikelihood, currentIteration,
 				maxIteration, tolerance)) {
 			stop = true;
 		} else {
+			// Reset variables
 			currentIteration++;
 			oldLikelihood = newLikelihood;
 			newLikelihood = 0.0;
@@ -177,7 +175,7 @@ double HMM::Learn(vector<MatrixXi> &observation, int maxIteration,
 				pi(i) = sum / K;
 			}
 
-			// Update transition
+			// Update transition probabilities
 			for (int i = 0; i < n; i++) {
 
 				for (int j = 0; j < n; j++) {
@@ -191,11 +189,12 @@ double HMM::Learn(vector<MatrixXi> &observation, int maxIteration,
 							numerator += gamma[k](t, i);
 						}
 					}
+
 					a(i,j) = (numerator) ? denominator/numerator : 0.0;
 				}
 			}
 
-			// Update emmission probabilities
+			// Update emission probabilities
 			for (int j = 0; j < n; j++) {
 				for (int l = 0; l < m; ++l) {
 					double denominator = 0, numerator = 0;
@@ -211,12 +210,13 @@ double HMM::Learn(vector<MatrixXi> &observation, int maxIteration,
 				}
 			}
 		}
-	} while (!stop);
+	}
+	while (!stop);
+
 	return newLikelihood;
 }
 
-bool HMM::CheckConvergen(double oldLikelihood, double newLikelihood,
-		int currentIteration, int maxIteration, double tolerance) {
+bool HMM::CheckConvergence(double oldLikelihood, double newLikelihood, int currentIteration, int maxIteration, double tolerance) {
 	// Update and verify stop criteria
 	if (tolerance > 0)
 	{
@@ -247,6 +247,17 @@ bool HMM::CheckConvergen(double oldLikelihood, double newLikelihood,
 	return false;
 }
 
+void HMM::Initialize(int n_, int m_){
+	n = n_;
+	m = m_;
+	a.resize(n, n);
+	b.resize(n, m);
+	pi.resize(n, 1);
+
+	a.fill(1.0/n);
+	b.fill(1.0/m);
+	pi.fill(1.0/n);
+}
 
 /* Private members access
  *
@@ -254,15 +265,11 @@ bool HMM::CheckConvergen(double oldLikelihood, double newLikelihood,
 int HMM::N() const {
 	return n;
 }
-int &HMM::N() {
-	return n;
-}
+
 int HMM::M() const {
 	return m;
 }
-int &HMM::M() {
-	return m;
-}
+
 MatrixXd HMM::A() const {
 	return a;
 }

@@ -30,16 +30,15 @@ public:
 	MatrixXd Backward(const MatrixXi &observation, const MatrixXd &scale);
 	MatrixXi Decode(const MatrixXi &observation, double &probability);
 	double Learn(vector<MatrixXi> &observation, int maxIteration, double tolerance);
-	bool CheckConvergen(double oldLikelihood, double newLikelihood, int currentIteration, int maxIteration, double tolerance);
+	bool CheckConvergence(double oldLikelihood, double newLikelihood, int currentIteration, int maxIteration, double tolerance);
 
+	void Initialize(int n_, int m_);
 	// private members access
 	int N() const;
 	int M() const;
 	MatrixXd A() const;
 	MatrixXd B() const;
 	MatrixXd PI() const;
-	int &M();
-	int &N();
 	MatrixXd &A();
 	MatrixXd &B();
 	MatrixXd &PI();
