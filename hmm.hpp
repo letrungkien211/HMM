@@ -25,7 +25,7 @@ public:
 	HMM(int n_, int m_);
 	~HMM();
 	// Methods
-	double Evaluate(const MatrixXi &observation);
+	double Evaluate(const MatrixXi &observation, bool logarithm = true);
 	MatrixXd Forward(const MatrixXi &observation, MatrixXd &scale);
 	MatrixXd Backward(const MatrixXi &observation, const MatrixXd &scale);
 	MatrixXi Decode(const MatrixXi &observation, double &probability);
@@ -46,7 +46,6 @@ public:
 	MatrixXd &PI();
 };
 
-void Scale(MatrixXd &m, int scale);
 template <class T>
 class MyMatrix3x{
 private:
