@@ -29,9 +29,8 @@ public:
 	MatrixXd Forward(const MatrixXi &observation, MatrixXd &scale);
 	MatrixXd Backward(const MatrixXi &observation, const MatrixXd &scale);
 	MatrixXi Decode(const MatrixXi &observation, double &probability);
-	double Learn(vector<MatrixXi> &observations, int iterations, double tolerance);
-	void Reset();
-	bool CheckConvergen();
+	double Learn(vector<MatrixXi> &observation, int maxIteration, double tolerance);
+	bool CheckConvergen(double oldLikelihood, double newLikelihood, int currentIteration, int maxIteration, double tolerance);
 
 	// private members access
 	int N() const;
@@ -46,28 +45,35 @@ public:
 	MatrixXd &PI();
 };
 
-template <class T>
-class MyMatrix3x{
+class MyMatrix3d{
 private:
 	int width, height;
-	vector<T> data;
+	MatrixXd data;
 public:
-	MyMatrix3x():width(0), height(0){
+	MyMatrix3d():width(0), height(0){
 	}
-	MyMatrix3x(int m, int n, int p): width(m), height(n){
+	MyMatrix3d(int m, int n, int p): width(m), height(n){
 		resize(m,n,p);
 	}
 	void resize(int m, int n, int p){
-		data.resize(m*n*p);
+		data.resize(m*n*p, 1);
 	}
-	T operator()(int i, int j, int k) const{
-		return data[i + j*width + k*width*height];
+	double operator()(int i, int j, int k) const{
+		return data(i + j*width + k*width*height);
 	}
-	T& operator()(int i, int j, int k){
-		return data[i + j*width + k*width*height];
+	double& operator()(int i, int j, int k){
+		return data(i + j*width + k*width*height);
+	}
+
+	MatrixXd operator()() const{
+		return data;
 	}
 };
 
-typedef MyMatrix3x<double> MyMatrix3d;
+ostream operator<<(ostream &os, const MyMatrix3d &m){
+	os << m();
+	return os;
+}
+
 }
 #endif
