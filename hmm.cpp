@@ -16,7 +16,7 @@ using namespace boost;
 
 
 HMM::HMM(int n_, int m_) :
-												n(n_), m(m_) {
+														n(n_), m(m_) {
 	a.resize(n, n);
 	b.resize(n, m);
 	pi.resize(n, 1);
@@ -217,8 +217,33 @@ double HMM::Learn(vector<MatrixXi> &observation, int maxIteration,
 
 bool HMM::CheckConvergen(double oldLikelihood, double newLikelihood,
 		int currentIteration, int maxIteration, double tolerance) {
-	if (currentIteration > maxIteration)
+	// Update and verify stop criteria
+	if (tolerance > 0)
+	{
+		// Stopping criteria is likelihood convergence
+		if (abs(oldLikelihood - newLikelihood) <= tolerance)
+			return true;
+
+		if (maxIteration > 0)
+		{
+			// Maximum iterations should also be respected
+			if (currentIteration >= maxIteration)
+				return true;
+		}
+	}
+	else
+	{
+		// Stopping criteria is number of iterations
+		if (currentIteration == maxIteration)
+			return true;
+	}
+
+	// Check if we have reached an invalid state
+	if (isnan(newLikelihood) || isinf(newLikelihood))
+	{
 		return true;
+	}
+
 	return false;
 }
 
