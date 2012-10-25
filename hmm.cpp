@@ -10,6 +10,7 @@
 #include <cmath>
 #include <cstdio>
 #include <boost/multi_array.hpp>
+
 namespace ltk {
 
 typedef boost::multi_array<double, 3> array_type;
@@ -84,9 +85,51 @@ MatrixXd HMM::Backward(const MatrixXi &observation, const MatrixXd &scale) {
 MatrixXi HMM::Decode(const MatrixXi &observation, double& probability) {
 	int T = observation.rows();
 	MatrixXi path(T,1);
+	MatrixXd delta(T,n);
+	MatrixXd phi(T,n);
 
+	int maxState;
+	double maxWeight;
+	double weight;
 
+	// 1. Initialization
+	for(int i = 0; i<n; i++){
+		delta(0,i) = log((double)pi(i))+log((double)b(i, observation(0)));
+		phi(0,i) = 0;
+	}
+	// 2. Induction
+	for(int t = 1; t< T; ++t){
+		for(int j = 0; j<n; ++j){
+			maxWeight = delta(t-1,0) + log((double)a(0,j));
+			maxState = 0;
+			for(int i = 0; i< n; ++i){
+				weight = delta(t-1, i) + log((double)a(i,j));
+				if(weight>maxWeight){
+					maxWeight = weight;
+					maxState = i;
+				}
+			}
+			delta(t,j) = maxWeight*b(j, observation(t));
+			phi(t,j) = maxState;
+		}
+	}
 
+	// 3. Termination
+	maxState = 0;
+	maxWeight = delta(0,T-1);
+	for(int i = 0; i< n; ++i){
+		if(delta(T-1,i)>maxWeight){
+			maxState = i;
+			maxWeight = delta(T-1,i);
+		}
+	}
+
+	// 4. Path
+	path(T-1) = maxState;
+	for(int t = T-1; t >=0; t--)
+		path(t) = phi(t+1, path(t+1));
+
+	probability = exp(maxWeight);
 	return path;
 }
 
