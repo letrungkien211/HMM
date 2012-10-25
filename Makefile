@@ -11,6 +11,7 @@ all: $(TARGET)
 	$(CC) -g -c $(CFLAGS)  $<
 $(TARGET): $(OBJS)
 	$(CC) -g -o $@ $^ $(LIBS) 
+	$(RM) $(OBJS)
 
 clean:
 	$(RM) $(TARGET) *#* *~ *.o
