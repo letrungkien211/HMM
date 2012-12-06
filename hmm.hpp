@@ -6,7 +6,7 @@
 #define HMM_HPP
 
 #include <vector>
-#include <eigen3/Eigen/Dense>  // eigen: linear algebra library
+#include <Eigen/Dense>  // eigen: linear algebra library
 
 namespace ltk{
 
